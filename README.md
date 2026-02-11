@@ -1,36 +1,72 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Map Agent
 
-## Getting Started
+A news chat app with an interactive Google Maps widget. Ask about news topics and see related locations pinned on the map. You can also navigate to specific cities and clear markers via chat commands.
 
-First, run the development server:
+## Prerequisites
+
+- Node.js 21+
+- npm
+- API keys for: OpenAI, Google Maps, NewsAPI
+
+## Setup
+
+1. Install dependencies:
+
+```bash
+npm install
+```
+
+2. Create your environment file:
+
+```bash
+cp .env.local.example .env.local
+```
+
+3. Fill in your API keys in `.env.local`:
+
+```
+OPENAI_API_KEY=your_openai_api_key_here
+NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your_google_maps_api_key_here
+NEWS_API_KEY=your_news_api_key_here
+```
+
+## Running locally
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## RSS reader (terminal)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+A standalone script for reading news via RSS feeds, no browser needed:
 
-## Learn More
+```bash
+# CNN top stories (default)
+npx tsx scripts/rss-reader.ts
 
-To learn more about Next.js, take a look at the following resources:
+# Other built-in feeds
+npx tsx scripts/rss-reader.ts cnn-world
+npx tsx scripts/rss-reader.ts cnn-tech
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# Any RSS URL
+npx tsx scripts/rss-reader.ts https://feeds.bbci.co.uk/news/rss.xml
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Project structure
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+src/app/
+  api/chat/route.ts       # AI streaming endpoint with tool definitions
+  components/
+    ChatWindow.tsx         # Chat UI with message rendering
+    MapWidget.tsx          # Google Maps with markers and info windows
+    NewsArticleCard.tsx    # News article card component
+  page.tsx                 # Split-pane layout (chat + map)
+  layout.tsx               # Root layout
+  globals.css              # Tailwind entry point
+scripts/
+  rss-reader.ts            # CLI RSS feed reader
+  rss-helpers.ts           # RSS fetch/parse/format helpers
+```
