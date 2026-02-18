@@ -1,9 +1,13 @@
 import { fetchRSS, printArticles } from "./rss-helpers";
 
 const DEFAULT_FEEDS: Record<string, string> = {
-  "cnn-top":   "http://rss.cnn.com/rss/cnn_topstories.rss",
-  "cnn-world": "http://rss.cnn.com/rss/cnn_world.rss",
-  "cnn-tech":  "http://rss.cnn.com/rss/cnn_tech.rss",
+  "bbc-top":   "https://feeds.bbci.co.uk/news/rss.xml",
+  "bbc-world": "https://feeds.bbci.co.uk/news/world/rss.xml",
+  "bbc-tech":  "https://feeds.bbci.co.uk/news/technology/rss.xml",
+  "nyt-top":   "https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml",
+  "nyt-world": "https://rss.nytimes.com/services/xml/rss/nyt/World.xml",
+  "npr":       "https://feeds.npr.org/1001/rss.xml",
+  "reuters":   "https://www.reutersagency.com/feed/?best-topics=tech",
 };
 
 async function main() {
@@ -17,8 +21,8 @@ async function main() {
     }
     console.log("\nExamples:");
     console.log("  npx tsx scripts/rss-reader.ts");
-    console.log("  npx tsx scripts/rss-reader.ts cnn-world");
-    console.log("  npx tsx scripts/rss-reader.ts https://feeds.bbci.co.uk/news/rss.xml");
+    console.log("  npx tsx scripts/rss-reader.ts nyt-top");
+    console.log("  npx tsx scripts/rss-reader.ts https://some-site.com/rss.xml");
     process.exit(0);
   }
 
@@ -26,8 +30,8 @@ async function main() {
   let label: string;
 
   if (!arg) {
-    url = DEFAULT_FEEDS["cnn-top"];
-    label = "CNN Top Stories";
+    url = DEFAULT_FEEDS["bbc-top"];
+    label = "BBC Top Stories";
   } else if (arg.startsWith("http")) {
     url = arg;
     label = arg;
