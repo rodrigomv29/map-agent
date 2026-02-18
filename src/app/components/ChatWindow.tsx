@@ -40,7 +40,8 @@ interface ChatWindowProps {
 }
 
 export function ChatWindow({ onMarkers, onMapView }: ChatWindowProps) {
-  const { messages, sendMessage, status } = useChat();
+  const chatApi = process.env.NEXT_PUBLIC_USE_MOCK === "true" ? "/api/chat-mock" : "/api/chat";
+  const { messages, sendMessage, status } = useChat({ api: chatApi });
   const [input, setInput] = useState("");
 
   const isLoading = status === "streaming" || status === "submitted";
