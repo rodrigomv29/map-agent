@@ -1,103 +1,64 @@
 import { openai } from "@ai-sdk/openai";
 import { streamText, convertToModelMessages, tool, stepCountIs } from "ai";
 import { z } from "zod/v4";
-import { MOCK_NEWS_RESPONSE, MOCK_PIN_LOCATIONS } from "./mock-news";
+import { MOCK_MARKERS } from "./mock-news";
 
 export async function POST(req: Request) {
   const { messages } = await req.json();
 
   const result = streamText({
     model: openai("gpt-4o-mini"),
-    system: `You are a helpful news assistant. You can search for current news using the getNews tool.
+    system: `You are a map assistant running in mock mode. You control an interactive map and can place markers, navigate to locations, and clear the map.
 
-When a user asks about news, current events, or recent happenings, use the getNews tool to fetch relevant articles. After receiving the results, provide a brief summary and discussion of the key articles.
+When a user asks to show, view, navigate to, or zoom into a city or location, call the showLocation tool.
 
-After summarizing news results, call the pinLocations tool with any articles that have a clearly identifiable, specific location (city, landmark, etc.). For each article, provide the location name and approximate latitude/longitude. If an article does not have a known specific location, set its location to "N/A" and omit it from the pinLocations call.
+When a user asks to place or drop a marker, call the placeMarker tool. In mock mode, always use the predefined mock markers regardless of what the user asks.
 
-When a user asks to show, view, or navigate to a specific city or location on the map (e.g. "show me Tokyo", "zoom into Paris"), call the showLocation tool with the location name, its latitude/longitude, and an appropriate zoom level (12 for cities, 6 for regions, 4 for countries).
+When a user asks to clear, remove, or reset the map markers, call the clearMarkers tool.
 
-When a user asks to clear the map, remove pins/markers, or reset the map, call the clearMarkers tool.
-
-Be concise, informative, and helpful.`,
+Be concise and confirm what you did on the map.`,
     messages: await convertToModelMessages(messages),
     tools: {
-      getNews: tool({
-        description:
-          "Search for news articles. Use this when users ask about current events, news, or recent happenings.",
-        inputSchema: z.object({
-          query: z.string().describe("Search query for news articles"),
-          category: z
-            .enum([
-              "business",
-              "entertainment",
-              "general",
-              "health",
-              "science",
-              "sports",
-              "technology",
-            ])
-            .optional()
-            .describe("News category to filter by"),
-          country: z
-            .string()
-            .optional()
-            .describe("2-letter ISO country code (e.g. 'us', 'gb')"),
-        }),
-        execute: async ({ query }) => {
-          console.log("[MOCK] getNews called with query:", query);
-          return { ...MOCK_NEWS_RESPONSE, query };
-        },
-      }),
       showLocation: tool({
         description:
-          "Show a specific location on the map. Use when the user asks to see, view, or navigate to a city or place.",
+          "Navigate the map to a location and place a marker.",
         inputSchema: z.object({
-          name: z.string().describe("Name of the location (e.g. 'Tokyo, Japan')"),
-          lat: z.number().describe("Latitude of the location"),
-          lng: z.number().describe("Longitude of the location"),
-          zoom: z
-            .number()
-            .describe("Zoom level: 4 for countries, 6 for regions, 12 for cities"),
+          name: z.string(),
+          lat: z.number(),
+          lng: z.number(),
+          zoom: z.number(),
         }),
         execute: async (input) => {
+          console.log("[MOCK] showLocation:", input.name);
           return input;
         },
       }),
+      placeMarker: tool({
+        description: "Place markers on the map.",
+        inputSchema: z.object({
+          markers: z.array(
+            z.object({
+              title: z.string(),
+              description: z.string().optional(),
+              lat: z.number(),
+              lng: z.number(),
+            })
+          ),
+        }),
+        execute: async () => {
+          console.log("[MOCK] placeMarker: returning mock markers");
+          return MOCK_MARKERS;
+        },
+      }),
       clearMarkers: tool({
-        description:
-          "Clear all markers from the map and reset the view. Use when the user asks to clear, remove, or reset map pins.",
+        description: "Clear all markers from the map.",
         inputSchema: z.object({}),
         execute: async () => {
           return { cleared: true };
         },
       }),
-      pinLocations: tool({
-        description:
-          "Pin news article locations on the map. Only include articles with a known specific location.",
-        inputSchema: z.object({
-          locations: z.array(
-            z.object({
-              title: z.string().describe("Article title"),
-              description: z
-                .string()
-                .describe("Short description of the article"),
-              location: z
-                .string()
-                .describe(
-                  'Location name (e.g. "New York, NY") or "N/A" if unknown'
-                ),
-              lat: z.number().describe("Latitude of the location"),
-              lng: z.number().describe("Longitude of the location"),
-            })
-          ),
-        }),
-        execute: async ({ locations }) => {
-          console.log("[MOCK] pinLocations called, using mock locations instead");
-          return MOCK_PIN_LOCATIONS;
-        },
-      }),
     },
-    stopWhen: stepCountIs(3),
+    stopWhen: stepCountIs(2),
   });
 
   return result.toUIMessageStreamResponse();
