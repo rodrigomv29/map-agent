@@ -1,6 +1,7 @@
 "use client";
 
 import { useChat } from "@ai-sdk/react";
+import { DefaultChatTransport } from "ai";
 import { useState, useEffect, FormEvent } from "react";
 import { NewsArticleCard } from "./NewsArticleCard";
 import { NewsMarker } from "./MapWidget";
@@ -41,7 +42,9 @@ interface ChatWindowProps {
 
 export function ChatWindow({ onMarkers, onMapView }: ChatWindowProps) {
   const chatApi = process.env.NEXT_PUBLIC_USE_MOCK === "true" ? "/api/chat-mock" : "/api/chat";
-  const { messages, sendMessage, status } = useChat({ api: chatApi });
+  const { messages, sendMessage, status } = useChat({
+    transport: new DefaultChatTransport({ api: chatApi }),
+  });
   const [input, setInput] = useState("");
 
   const isLoading = status === "streaming" || status === "submitted";
