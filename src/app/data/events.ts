@@ -36,7 +36,7 @@ export const NJ_EVENTS: Event[] = [
   {
     id: "fetty-wap-2026-04-04",
     title: "Fetty Wap Official Welcome Home Concert",
-    date: "Sat • Apr 04, 2026",
+    date: "Sat Apr 04, 2026",
     time: "8:00 PM",
     venue: "The Wellmont Theater",
     city: "Montclair",
@@ -48,7 +48,7 @@ export const NJ_EVENTS: Event[] = [
   {
     id: "maddox-batson-2026-03-01",
     title: "Maddox Batson: Live Worldwide Tour",
-    date: "Sun, Mar 01, 2026",
+    date: "Sun Mar 01, 2026",
     time: "7:00 PM",
     venue: "The Wellmont Theater",
     city: "Montclair",
@@ -60,7 +60,7 @@ export const NJ_EVENTS: Event[] = [
   {
     id: "pilobolus-2026-02-28",
     title: "Pilobolus",
-    date: "Sat, Feb 28, 2026",
+    date: "Sat Feb 28, 2026",
     time: "8:00 PM",
     venue: "New Jersey Performing Arts Center",
     city: "Newark",
@@ -72,7 +72,7 @@ export const NJ_EVENTS: Event[] = [
   {
     id: "mgk-2026-06-09",
     title: "MGK: Lost Americana Tour",
-    date: "Tue, Jun 09, 2026",
+    date: "Tue Jun 09, 2026",
     time: "7:00 PM",
     venue: "PNC Bank Arts Center",
     city: "Holmdel",
