@@ -34,6 +34,9 @@ export function ChatWindow({ onMarkers, onMapView }: ChatWindowProps) {
   const isLoading = status === "streaming" || status === "submitted";
 
   useEffect(() => {
+    // Don't override initial markers when there are no chat messages yet
+    if (messages.length === 0) return;
+
     const allMarkers: NewsMarker[] = [];
     let latestView: { center: { lat: number; lng: number }; zoom: number } | null = null;
 

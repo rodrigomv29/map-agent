@@ -3,11 +3,14 @@
 import { useState, useCallback } from "react";
 import { ChatWindow } from "./components/ChatWindow";
 import { MapWidget, NewsMarker } from "./components/MapWidget";
+import { NJ_EVENTS, eventToMarker } from "./data/events";
+
+const INITIAL_MARKERS: NewsMarker[] = NJ_EVENTS.map(eventToMarker);
 
 export default function Home() {
-  const [markers, setMarkers] = useState<NewsMarker[]>([]);
-  const [center, setCenter] = useState<{ lat: number; lng: number }>({ lat: 39.8283, lng: -98.5795 });
-  const [zoom, setZoom] = useState(4);
+  const [markers, setMarkers] = useState<NewsMarker[]>(INITIAL_MARKERS);
+  const [center, setCenter] = useState<{ lat: number; lng: number }>({ lat: 40.2, lng: -74.5 });
+  const [zoom, setZoom] = useState(9);
 
   const handleMapView = useCallback((c: { lat: number; lng: number }, z: number) => {
     setCenter(c);
