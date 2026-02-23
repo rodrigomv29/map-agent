@@ -13,6 +13,7 @@ export interface NewsMarker {
 
 interface MapWidgetProps {
   markers?: NewsMarker[];
+  eventMarkers?: NewsMarker[];
   center?: { lat: number; lng: number };
   zoom?: number;
 }
@@ -33,12 +34,24 @@ const NJ_ZOOM = 8;
 // Must be stable (outside component) to avoid Google Maps warning
 const LIBRARIES: ("visualization")[] = ["visualization"];
 
+// Purple pin icon for event markers — distinct from default red chat markers
+const EVENT_MARKER_ICON = {
+  path: "M 0,-1 C -0.55,-1 -1,-0.55 -1,0 C -1,0.55 0,2 0,2 C 0,2 1,0.55 1,0 C 1,-0.55 0.55,-1 0,-1 Z",
+  fillColor: "#7c3aed",
+  fillOpacity: 1,
+  strokeColor: "#ffffff",
+  strokeWeight: 0.5,
+  scale: 14,
+};
+
 export function MapWidget({
   markers = [],
+  eventMarkers = [],
   center = defaultCenter,
   zoom = 4,
 }: MapWidgetProps) {
   const [selectedMarker, setSelectedMarker] = useState<NewsMarker | null>(null);
+  const [showEventLayer, setShowEventLayer] = useState(true);
   const [showNJLayer, setShowNJLayer] = useState(false);
   const [njView, setNjView] = useState(false);
   const [mapRef, setMapRef] = useState<google.maps.Map | null>(null);
@@ -115,6 +128,7 @@ export function MapWidget({
           fullscreenControl: true,
         }}
       >
+        {/* Chat-placed markers — default red Google pin */}
         {markers.map((marker) => (
           <Marker
             key={marker.id}
@@ -123,6 +137,18 @@ export function MapWidget({
             onClick={() => onMarkerClick(marker)}
           />
         ))}
+
+        {/* Event markers — purple pin, togglable */}
+        {showEventLayer &&
+          eventMarkers.map((marker) => (
+            <Marker
+              key={marker.id}
+              position={marker.position}
+              title={marker.title}
+              icon={EVENT_MARKER_ICON}
+              onClick={() => onMarkerClick(marker)}
+            />
+          ))}
 
         {selectedMarker && (
           <InfoWindow
@@ -143,19 +169,32 @@ export function MapWidget({
         {showNJLayer && <NJPopulationLayer />}
       </GoogleMap>
 
-      {/* Toggle button */}
-      <button
-        onClick={handleToggleNJ}
-        className={`absolute left-3 top-3 z-10 rounded-md px-3 py-1.5 text-xs font-semibold shadow-md transition-colors ${
-          showNJLayer
-            ? "bg-red-600 text-white hover:bg-red-700"
-            : "bg-white text-zinc-800 hover:bg-zinc-100"
-        }`}
-      >
-        {showNJLayer ? "Hide NJ Density" : "NJ Population Density"}
-      </button>
+      {/* Layer controls — top-left */}
+      <div className="absolute left-3 top-3 z-10 flex flex-col gap-1.5">
+        <button
+          onClick={() => setShowEventLayer((v) => !v)}
+          className={`rounded-md px-3 py-1.5 text-xs font-semibold shadow-md transition-colors ${
+            showEventLayer
+              ? "bg-violet-600 text-white hover:bg-violet-700"
+              : "bg-white text-zinc-800 hover:bg-zinc-100"
+          }`}
+        >
+          {showEventLayer ? "Hide Events" : "Show Events"}
+        </button>
 
-      {/* Legend — visible only when layer is on */}
+        <button
+          onClick={handleToggleNJ}
+          className={`rounded-md px-3 py-1.5 text-xs font-semibold shadow-md transition-colors ${
+            showNJLayer
+              ? "bg-red-600 text-white hover:bg-red-700"
+              : "bg-white text-zinc-800 hover:bg-zinc-100"
+          }`}
+        >
+          {showNJLayer ? "Hide NJ Density" : "NJ Population Density"}
+        </button>
+      </div>
+
+      {/* Legend — visible only when NJ density layer is on */}
       {showNJLayer && (
         <div className="absolute bottom-8 left-3 z-10 rounded-md bg-white/90 p-3 shadow-md backdrop-blur-sm">
           <p className="mb-1.5 text-xs font-bold text-zinc-700">
