@@ -10,8 +10,8 @@ const EVENT_MARKERS: NewsMarker[] = NJ_EVENTS.map(eventToMarker);
 
 export default function Home() {
   const [chatMarkers, setChatMarkers] = useState<NewsMarker[]>([]);
-  const [center, setCenter] = useState<{ lat: number; lng: number }>({ lat: 40.2, lng: -74.5 });
-  const [zoom, setZoom] = useState(9);
+  const [center, setCenter] = useState<{ lat: number; lng: number }>({ lat: 40.0583, lng: -74.4057 });
+  const [zoom, setZoom] = useState(8);
 
   const handleMapView = useCallback((c: { lat: number; lng: number }, z: number) => {
     setCenter(c);

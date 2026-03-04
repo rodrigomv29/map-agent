@@ -166,7 +166,7 @@ export function MapWidget({
           </InfoWindow>
         )}
 
-        {showNJLayer && <NJPopulationLayer />}
+        <NJPopulationLayer visible={showNJLayer} />
       </GoogleMap>
 
       {/* Layer controls — top-left */}

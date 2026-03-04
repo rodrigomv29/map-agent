@@ -49,7 +49,11 @@ export const NJ_COUNTY_LIST: NJCounty[] = NJ_COUNTIES.map(({ name, density }) =>
   density,
 }));
 
-export function NJPopulationLayer() {
+interface NJPopulationLayerProps {
+  visible: boolean;
+}
+
+export function NJPopulationLayer({ visible }: NJPopulationLayerProps) {
   // sqrt-scale so mid-density counties are still visible (Hudson won't completely dominate)
   const data = useMemo(() => {
     return NJ_COUNTIES.map(({ lat, lng, density }) => ({
@@ -63,7 +67,10 @@ export function NJPopulationLayer() {
       data={data}
       options={{
         radius: 50,
-        opacity: 0.85,
+        // Toggle via opacity instead of unmounting — avoids the HeatmapLayer
+        // cleanup bug in @react-google-maps/api where .setMap(null) is not
+        // called on unmount, leaving the heatmap visually stuck on the map.
+        opacity: visible ? 0.85 : 0,
         gradient: HEATMAP_GRADIENT,
       }}
     />

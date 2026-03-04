@@ -16,7 +16,7 @@ export type EventCategory =
 export interface Event {
   id: string;
   title: string;
-  /** Display date string, e.g. "Sat • Apr 04, 2026" */
+  /** Display date string, e.g. "Sat Apr 04, 2026" */
   date: string;
   /** Display time string, e.g. "8:00 PM" */
   time: string;
