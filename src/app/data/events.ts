@@ -70,6 +70,18 @@ export const NJ_EVENTS: Event[] = [
     category: "dance",
   },
   {
+    id: "miguel-2026-03-27",
+    title: "Miguel: CAOS Tour",
+    date: "Fri Mar 27, 2026",
+    time: "8:00 PM",
+    venue: "The Wellmont Theater",
+    city: "Montclair",
+    state: "NJ",
+    lat: 40.8246,
+    lng: -74.2094,
+    category: "concert",
+  },
+  {
     id: "mgk-2026-06-09",
     title: "MGK: Lost Americana Tour",
     date: "Tue Jun 09, 2026",
