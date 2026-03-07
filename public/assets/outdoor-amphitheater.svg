@@ -1,0 +1,146 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450">
+  <defs>
+    <linearGradient id="sky-oa" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#020814"/>
+      <stop offset="60%" stop-color="#0a1a2e"/>
+      <stop offset="100%" stop-color="#0f2640"/>
+    </linearGradient>
+    <linearGradient id="stage-oa" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1a2a3a"/>
+      <stop offset="100%" stop-color="#0a1520"/>
+    </linearGradient>
+    <radialGradient id="stage-lights" cx="50%" cy="0%" r="80%">
+      <stop offset="0%" stop-color="#fbbf24" stop-opacity="0.5"/>
+      <stop offset="40%" stop-color="#f97316" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#f97316" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="green-beam" cx="30%" cy="0%" r="60%">
+      <stop offset="0%" stop-color="#4ade80" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#4ade80" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="red-beam" cx="70%" cy="0%" r="60%">
+      <stop offset="0%" stop-color="#f87171" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#f87171" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="star-glow">
+      <feGaussianBlur stdDeviation="1"/>
+    </filter>
+  </defs>
+
+  <!-- Night sky -->
+  <rect width="800" height="450" fill="url(#sky-oa)"/>
+
+  <!-- Stars -->
+  <g fill="white">
+    <circle cx="45" cy="25" r="1" opacity="0.8"/>
+    <circle cx="120" cy="15" r="1.5" opacity="0.9"/>
+    <circle cx="195" cy="40" r="1" opacity="0.7"/>
+    <circle cx="270" cy="18" r="1" opacity="0.8"/>
+    <circle cx="335" cy="35" r="1.5" opacity="0.9"/>
+    <circle cx="70" cy="60" r="1" opacity="0.6"/>
+    <circle cx="155" cy="52" r="1" opacity="0.8"/>
+    <circle cx="225" cy="68" r="1.5" opacity="0.7"/>
+    <circle cx="310" cy="55" r="1" opacity="0.9"/>
+    <circle cx="490" cy="22" r="1.5" opacity="0.8"/>
+    <circle cx="560" cy="38" r="1" opacity="0.7"/>
+    <circle cx="635" cy="15" r="1" opacity="0.9"/>
+    <circle cx="700" cy="45" r="1.5" opacity="0.8"/>
+    <circle cx="755" cy="28" r="1" opacity="0.7"/>
+    <circle cx="530" cy="60" r="1" opacity="0.8"/>
+    <circle cx="605" cy="70" r="1.5" opacity="0.9"/>
+    <circle cx="680" cy="55" r="1" opacity="0.7"/>
+    <circle cx="740" cy="68" r="1" opacity="0.8"/>
+    <circle cx="100" cy="88" r="1" opacity="0.6"/>
+    <circle cx="420" cy="12" r="1" opacity="0.9"/>
+    <circle cx="380" cy="50" r="1" opacity="0.7"/>
+  </g>
+
+  <!-- Moon -->
+  <circle cx="680" cy="55" r="18" fill="#fef3c7" opacity="0.85"/>
+  <circle cx="690" cy="48" r="15" fill="#0a1a2e" opacity="0.9"/>
+
+  <!-- Amphitheater roof/canopy structure -->
+  <path d="M160,100 Q400,60 640,100 L640,140 Q400,105 160,140 Z" fill="#1e3a5f" opacity="0.9"/>
+  <path d="M140,95 Q400,52 660,95" stroke="#2d5986" stroke-width="3" fill="none" opacity="0.7"/>
+
+  <!-- Roof support trusses -->
+  <line x1="200" y1="95" x2="200" y2="200" stroke="#1e3a5f" stroke-width="4" opacity="0.8"/>
+  <line x1="400" y1="60" x2="400" y2="200" stroke="#1e3a5f" stroke-width="5" opacity="0.8"/>
+  <line x1="600" y1="95" x2="600" y2="200" stroke="#1e3a5f" stroke-width="4" opacity="0.8"/>
+
+  <!-- Stage area -->
+  <rect x="150" y="200" width="500" height="100" fill="url(#stage-oa)"/>
+  <rect x="150" y="198" width="500" height="4" fill="#fbbf24" opacity="0.4"/>
+
+  <!-- Stage lights ambient -->
+  <rect x="150" y="100" width="500" height="200" fill="url(#stage-lights)"/>
+  <rect x="150" y="100" width="250" height="200" fill="url(#green-beam)"/>
+  <rect x="400" y="100" width="250" height="200" fill="url(#red-beam)"/>
+
+  <!-- Stage speaker towers -->
+  <rect x="148" y="160" width="35" height="110" fill="#0f1e2e" rx="2"/>
+  <rect x="617" y="160" width="35" height="110" fill="#0f1e2e" rx="2"/>
+
+  <!-- Performer silhouette (distant) -->
+  <ellipse cx="400" cy="238" rx="8" ry="12" fill="#050e1a"/>
+  <circle cx="400" cy="222" r="7" fill="#050e1a"/>
+  <!-- Arms raised -->
+  <path d="M393,230 Q380,218 370,212" stroke="#050e1a" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <path d="M407,230 Q420,218 430,212" stroke="#050e1a" stroke-width="5" fill="none" stroke-linecap="round"/>
+
+  <!-- Stage light beams shooting up -->
+  <polygon points="180,200 195,200 130,0 115,0" fill="#4ade80" opacity="0.06"/>
+  <polygon points="290,200 305,200 250,0 235,0" fill="#fbbf24" opacity="0.07"/>
+  <polygon points="495,200 510,200 555,0 540,0" fill="#fbbf24" opacity="0.07"/>
+  <polygon points="605,200 620,200 665,0 650,0" fill="#f87171" opacity="0.06"/>
+
+  <!-- Crowd — wide outdoor audience -->
+  <!-- Row 3 (far back, tiny) -->
+  <g fill="#091520" opacity="0.6">
+    <rect x="0" y="318" width="800" height="12" rx="6"/>
+  </g>
+  <!-- Row 2 -->
+  <g fill="#0a1825" opacity="0.8">
+    <ellipse cx="50" cy="342" rx="22" ry="18"/>
+    <ellipse cx="98" cy="345" rx="20" ry="17"/>
+    <ellipse cx="145" cy="340" rx="21" ry="18"/>
+    <ellipse cx="192" cy="344" rx="22" ry="18"/>
+    <ellipse cx="240" cy="340" rx="20" ry="17"/>
+    <ellipse cx="287" cy="344" rx="21" ry="18"/>
+    <ellipse cx="334" cy="340" rx="22" ry="18"/>
+    <ellipse cx="381" cy="344" rx="20" ry="17"/>
+    <ellipse cx="428" cy="340" rx="21" ry="18"/>
+    <ellipse cx="476" cy="344" rx="22" ry="18"/>
+    <ellipse cx="523" cy="340" rx="20" ry="17"/>
+    <ellipse cx="570" cy="344" rx="21" ry="18"/>
+    <ellipse cx="617" cy="340" rx="22" ry="18"/>
+    <ellipse cx="664" cy="344" rx="20" ry="17"/>
+    <ellipse cx="712" cy="340" rx="21" ry="18"/>
+    <ellipse cx="759" cy="344" rx="20" ry="17"/>
+  </g>
+  <!-- Row 1 (front, large) -->
+  <g fill="#060f18" opacity="0.95">
+    <ellipse cx="30" cy="400" rx="32" ry="42"/>
+    <ellipse cx="90" cy="404" rx="30" ry="40"/>
+    <ellipse cx="150" cy="398" rx="31" ry="41"/>
+    <ellipse cx="210" cy="403" rx="32" ry="42"/>
+    <ellipse cx="270" cy="398" rx="30" ry="40"/>
+    <ellipse cx="330" cy="403" rx="31" ry="41"/>
+    <ellipse cx="390" cy="398" rx="32" ry="42"/>
+    <ellipse cx="450" cy="403" rx="30" ry="40"/>
+    <ellipse cx="510" cy="398" rx="31" ry="41"/>
+    <ellipse cx="570" cy="403" rx="32" ry="42"/>
+    <ellipse cx="630" cy="398" rx="30" ry="40"/>
+    <ellipse cx="690" cy="403" rx="31" ry="41"/>
+    <ellipse cx="755" cy="398" rx="32" ry="42"/>
+  </g>
+  <!-- Phone lights in crowd -->
+  <g fill="#e0f2fe" opacity="0.6">
+    <rect x="75" y="370" width="3" height="5" rx="1"/>
+    <rect x="185" y="368" width="3" height="5" rx="1"/>
+    <rect x="295" y="372" width="3" height="5" rx="1"/>
+    <rect x="405" y="369" width="3" height="5" rx="1"/>
+    <rect x="515" y="371" width="3" height="5" rx="1"/>
+    <rect x="625" y="368" width="3" height="5" rx="1"/>
+  </g>
+</svg>
