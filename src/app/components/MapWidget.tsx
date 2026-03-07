@@ -3,6 +3,8 @@
 import { GoogleMap, useJsApiLoader, Marker, InfoWindow } from "@react-google-maps/api";
 import { useState, useCallback } from "react";
 import { NJPopulationLayer, NJ_COUNTY_LIST } from "./NJPopulationLayer";
+import { StoryViewer } from "./StoryViewer";
+import { isStoryMarker, type StoryMarker } from "../types/story";
 
 export interface NewsMarker {
   id: string;
@@ -51,6 +53,7 @@ export function MapWidget({
   zoom = 4,
 }: MapWidgetProps) {
   const [selectedMarker, setSelectedMarker] = useState<NewsMarker | null>(null);
+  const [selectedStoryMarker, setSelectedStoryMarker] = useState<StoryMarker | null>(null);
   const [showEventLayer, setShowEventLayer] = useState(true);
   const [showNJLayer, setShowNJLayer] = useState(false);
   const [njView, setNjView] = useState(false);
@@ -62,7 +65,11 @@ export function MapWidget({
   });
 
   const onMarkerClick = useCallback((marker: NewsMarker) => {
-    setSelectedMarker(marker);
+    if (isStoryMarker(marker)) {
+      setSelectedStoryMarker(marker);
+    } else {
+      setSelectedMarker(marker);
+    }
   }, []);
 
   const onInfoWindowClose = useCallback(() => {
@@ -168,6 +175,13 @@ export function MapWidget({
 
         <NJPopulationLayer visible={showNJLayer} />
       </GoogleMap>
+
+      {selectedStoryMarker && (
+        <StoryViewer
+          marker={selectedStoryMarker}
+          onClose={() => setSelectedStoryMarker(null)}
+        />
+      )}
 
       {/* Layer controls — top-left */}
       <div className="absolute left-3 top-3 z-10 flex flex-col gap-1.5">

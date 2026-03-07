@@ -138,12 +138,33 @@ export function ChatWindow({ onMarkers, onMapView }: ChatWindowProps) {
   return (
     <div className="flex h-full flex-col bg-white dark:bg-zinc-900">
       <div className="border-b border-zinc-200 p-4 dark:border-zinc-700">
-        <h1 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
-          Map Chat
-        </h1>
-        <p className="text-sm text-zinc-500 dark:text-zinc-400">
-          Ask to navigate, place markers, or clear the map
-        </p>
+        <div className="flex items-start justify-between gap-2">
+          <div>
+            <h1 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+              Map Chat
+            </h1>
+            <p className="text-sm text-zinc-500 dark:text-zinc-400">
+              Ask to navigate, place markers, or clear the map
+            </p>
+          </div>
+
+          {/* Sign in with Meta */}
+          <button
+            type="button"
+            className="flex shrink-0 items-center gap-2 rounded-lg bg-[#1877F2] px-3 py-2 text-xs font-semibold text-white shadow-sm transition-opacity hover:opacity-90 active:opacity-80"
+          >
+            {/* Meta logo mark */}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              className="h-4 w-4 fill-white"
+              aria-hidden="true"
+            >
+              <path d="M12 2C6.477 2 2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.879V14.89h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.989C18.343 21.129 22 16.99 22 12c0-5.523-4.477-10-10-10z"/>
+            </svg>
+            Sign in with Meta
+          </button>
+        </div>
       </div>
 
       <div className="flex-1 overflow-y-auto p-4">

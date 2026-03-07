@@ -1,8 +1,7 @@
 import type { NewsMarker } from "../components/MapWidget";
+import type { Story, StoryMarker } from "../types/story";
 
 // ─── Event type ─────────────────────────────────────────────────────────────
-// Keep category open-ended so future event types (sports, comedy, etc.)
-// can be added without changing the base interface.
 
 export type EventCategory =
   | "concert"
@@ -16,9 +15,7 @@ export type EventCategory =
 export interface Event {
   id: string;
   title: string;
-  /** Display date string, e.g. "Sat Apr 04, 2026" */
   date: string;
-  /** Display time string, e.g. "8:00 PM" */
   time: string;
   venue: string;
   city: string;
@@ -26,7 +23,7 @@ export interface Event {
   lat: number;
   lng: number;
   category: EventCategory;
-  /** Optional extra detail — ticket URL, performer bio, etc. */
+  stories?: Story[];
   url?: string;
 }
 
@@ -44,6 +41,20 @@ export const NJ_EVENTS: Event[] = [
     lat: 40.8245,
     lng: -74.2096,
     category: "concert",
+    stories: [
+      {
+        id: "fetty-1",
+        imageUrl: "/assets/hip-hop-stage.svg",
+        caption: "Official Welcome Home Concert",
+        duration: 5000,
+      },
+      {
+        id: "fetty-2",
+        imageUrl: "/assets/venue-exterior.svg",
+        caption: "The Wellmont Theater · Montclair, NJ",
+        duration: 4000,
+      },
+    ],
   },
   {
     id: "maddox-batson-2026-03-01",
@@ -53,9 +64,23 @@ export const NJ_EVENTS: Event[] = [
     venue: "The Wellmont Theater",
     city: "Montclair",
     state: "NJ",
-    lat: 40.8248,   // offset slightly so it doesn't stack with Fetty Wap pin
+    lat: 40.8248,
     lng: -74.2093,
     category: "concert",
+    stories: [
+      {
+        id: "maddox-1",
+        imageUrl: "/assets/intimate-venue.svg",
+        caption: "Live Worldwide Tour",
+        duration: 5000,
+      },
+      {
+        id: "maddox-2",
+        imageUrl: "/assets/venue-exterior.svg",
+        caption: "The Wellmont Theater · Montclair, NJ",
+        duration: 4000,
+      },
+    ],
   },
   {
     id: "pilobolus-2026-02-28",
@@ -68,6 +93,20 @@ export const NJ_EVENTS: Event[] = [
     lat: 40.7357,
     lng: -74.1724,
     category: "dance",
+    stories: [
+      {
+        id: "pilobolus-1",
+        imageUrl: "/assets/dance-theater.svg",
+        caption: "An Evening of Dance",
+        duration: 6000,
+      },
+      {
+        id: "pilobolus-2",
+        imageUrl: "/assets/intimate-venue.svg",
+        caption: "New Jersey Performing Arts Center · Newark, NJ",
+        duration: 4000,
+      },
+    ],
   },
   {
     id: "miguel-2026-03-27",
@@ -80,6 +119,20 @@ export const NJ_EVENTS: Event[] = [
     lat: 40.8246,
     lng: -74.2094,
     category: "concert",
+    stories: [
+      {
+        id: "miguel-1",
+        imageUrl: "/assets/intimate-venue.svg",
+        caption: "CAOS Tour",
+        duration: 5000,
+      },
+      {
+        id: "miguel-2",
+        imageUrl: "/assets/venue-exterior.svg",
+        caption: "The Wellmont Theater · Montclair, NJ",
+        duration: 4000,
+      },
+    ],
   },
   {
     id: "mgk-2026-06-09",
@@ -92,18 +145,37 @@ export const NJ_EVENTS: Event[] = [
     lat: 40.3579,
     lng: -74.1846,
     category: "concert",
+    stories: [
+      {
+        id: "mgk-1",
+        imageUrl: "/assets/outdoor-amphitheater.svg",
+        caption: "Lost Americana Tour",
+        duration: 5000,
+      },
+      {
+        id: "mgk-2",
+        imageUrl: "/assets/hip-hop-stage.svg",
+        caption: "PNC Bank Arts Center · Holmdel, NJ",
+        duration: 4000,
+      },
+    ],
   },
 ];
 
 // ─── Converter ───────────────────────────────────────────────────────────────
-// Converts any Event to the MapWidget's NewsMarker shape so no other
-// component needs to know about the Event type directly.
+// Returns a StoryMarker when the event has stories, NewsMarker otherwise.
 
-export function eventToMarker(event: Event): NewsMarker {
-  return {
+export function eventToMarker(event: Event): StoryMarker | NewsMarker {
+  const base: NewsMarker = {
     id: event.id,
     position: { lat: event.lat, lng: event.lng },
     title: event.title,
     description: `${event.date} · ${event.time}\n${event.venue}, ${event.city}, ${event.state}`,
   };
+
+  if (event.stories && event.stories.length > 0) {
+    return { ...base, stories: event.stories } satisfies StoryMarker;
+  }
+
+  return base;
 }
