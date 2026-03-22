@@ -159,7 +159,7 @@ export function ChatWindow({ onMarkers, onMapView }: ChatWindowProps) {
         </div>
 
         <p className="mt-1 text-[10px] text-zinc-700">
-          Model: <span className="text-zinc-500">claude-sonnet-4-6</span>
+          Model: <span className="text-zinc-500">gpt-4o-mini</span>
           {"  ·  "}Tools: <span className="text-zinc-500">3 active</span>
         </p>
       </div>
