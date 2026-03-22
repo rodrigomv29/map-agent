@@ -11,11 +11,14 @@ export interface NewsMarker {
   position: { lat: number; lng: number };
   title: string;
   description?: string;
+  /** Hex color string — drives the hexagon stroke/fill for headline markers */
+  accentColor?: string;
 }
 
 interface MapWidgetProps {
   markers?: NewsMarker[];
   eventMarkers?: NewsMarker[];
+  headlineMarkers?: NewsMarker[];
   center?: { lat: number; lng: number };
   zoom?: number;
 }
@@ -36,19 +39,52 @@ const NJ_ZOOM = 8;
 // Must be stable (outside component) to avoid Google Maps warning
 const LIBRARIES: ("visualization")[] = ["visualization"];
 
-// Purple pin icon for event markers — distinct from default red chat markers
+// Flat-top hexagon — matches the screenshot's marker style
 const EVENT_MARKER_ICON = {
-  path: "M 0,-1 C -0.55,-1 -1,-0.55 -1,0 C -1,0.55 0,2 0,2 C 0,2 1,0.55 1,0 C 1,-0.55 0.55,-1 0,-1 Z",
-  fillColor: "#7c3aed",
-  fillOpacity: 1,
-  strokeColor: "#ffffff",
-  strokeWeight: 0.5,
-  scale: 14,
+  path: "M 1,0 L 0.5,0.866 L -0.5,0.866 L -1,0 L -0.5,-0.866 L 0.5,-0.866 Z",
+  fillColor: "#22d3ee",
+  fillOpacity: 0.15,
+  strokeColor: "#22d3ee",
+  strokeWeight: 1.5,
+  scale: 12,
 };
+
+// Cyan diamond for chat-placed markers
+const CHAT_MARKER_ICON = {
+  path: "M 0,-1.2 L 0.85,0 L 0,1.2 L -0.85,0 Z",
+  fillColor: "#60a5fa",
+  fillOpacity: 0.2,
+  strokeColor: "#60a5fa",
+  strokeWeight: 1.5,
+  scale: 10,
+};
+
+// Dark map style
+const DARK_MAP_STYLES: google.maps.MapTypeStyle[] = [
+  { elementType: "geometry",            stylers: [{ color: "#0b0d12" }] },
+  { elementType: "labels.icon",         stylers: [{ visibility: "off" }] },
+  { elementType: "labels.text.fill",    stylers: [{ color: "#3a4455" }] },
+  { elementType: "labels.text.stroke",  stylers: [{ color: "#0b0d12" }] },
+  { featureType: "administrative",      elementType: "geometry",           stylers: [{ color: "#151a24" }] },
+  { featureType: "administrative.country", elementType: "labels.text.fill", stylers: [{ color: "#4a6070" }] },
+  { featureType: "administrative.locality", elementType: "labels.text.fill", stylers: [{ color: "#3a5060" }] },
+  { featureType: "landscape",           stylers: [{ color: "#0d1018" }] },
+  { featureType: "poi",                 elementType: "geometry",           stylers: [{ color: "#0d1018" }] },
+  { featureType: "poi.park",            elementType: "geometry",           stylers: [{ color: "#0a1218" }] },
+  { featureType: "road",                elementType: "geometry",           stylers: [{ color: "#1c2535" }] },
+  { featureType: "road",                elementType: "geometry.stroke",    stylers: [{ color: "#121822" }] },
+  { featureType: "road",                elementType: "labels.text.fill",   stylers: [{ color: "#384858" }] },
+  { featureType: "road.highway",        elementType: "geometry",           stylers: [{ color: "#233040" }] },
+  { featureType: "road.highway",        elementType: "labels.text.fill",   stylers: [{ color: "#425565" }] },
+  { featureType: "transit",             elementType: "geometry",           stylers: [{ color: "#151a26" }] },
+  { featureType: "water",               elementType: "geometry",           stylers: [{ color: "#060910" }] },
+  { featureType: "water",               elementType: "labels.text.fill",   stylers: [{ color: "#2a4050" }] },
+];
 
 export function MapWidget({
   markers = [],
   eventMarkers = [],
+  headlineMarkers = [],
   center = defaultCenter,
   zoom = 4,
 }: MapWidgetProps) {
@@ -98,24 +134,16 @@ export function MapWidget({
 
   if (loadError) {
     return (
-      <div className="flex h-full items-center justify-center bg-zinc-100 dark:bg-zinc-800">
-        <div className="text-center">
-          <p className="text-zinc-600 dark:text-zinc-400">Failed to load map</p>
-          <p className="text-sm text-zinc-500 dark:text-zinc-500">
-            Please check your API key
-          </p>
-        </div>
+      <div className="flex h-full items-center justify-center bg-[#0b0d12]">
+        <p className="font-mono text-xs tracking-widest text-red-500">ERR · map failed to load</p>
       </div>
     );
   }
 
   if (!isLoaded) {
     return (
-      <div className="flex h-full items-center justify-center bg-zinc-100 dark:bg-zinc-800">
-        <div className="text-center">
-          <div className="mx-auto mb-2 h-8 w-8 animate-spin rounded-full border-4 border-zinc-300 border-t-blue-600" />
-          <p className="text-zinc-600 dark:text-zinc-400">Loading map...</p>
-        </div>
+      <div className="flex h-full items-center justify-center bg-[#0b0d12]">
+        <p className="animate-pulse font-mono text-xs tracking-widest text-cyan-700">initializing map...</p>
       </div>
     );
   }
@@ -132,20 +160,22 @@ export function MapWidget({
           zoomControl: true,
           mapTypeControl: false,
           streetViewControl: false,
-          fullscreenControl: true,
+          fullscreenControl: false,
+          styles: DARK_MAP_STYLES,
         }}
       >
-        {/* Chat-placed markers — default red Google pin */}
+        {/* Chat-placed markers — blue diamond */}
         {markers.map((marker) => (
           <Marker
             key={marker.id}
             position={marker.position}
             title={marker.title}
+            icon={CHAT_MARKER_ICON}
             onClick={() => onMarkerClick(marker)}
           />
         ))}
 
-        {/* Event markers — purple pin, togglable */}
+        {/* Event markers — cyan hexagon, togglable */}
         {showEventLayer &&
           eventMarkers.map((marker) => (
             <Marker
@@ -157,15 +187,35 @@ export function MapWidget({
             />
           ))}
 
+        {/* Headline markers — colored hexagon per category accent */}
+        {headlineMarkers.map((marker) => (
+          <Marker
+            key={marker.id}
+            position={marker.position}
+            title={marker.title}
+            icon={{
+              path: "M 1,0 L 0.5,0.866 L -0.5,0.866 L -1,0 L -0.5,-0.866 L 0.5,-0.866 Z",
+              fillColor: marker.accentColor ?? "#ef4444",
+              fillOpacity: 0.2,
+              strokeColor: marker.accentColor ?? "#ef4444",
+              strokeWeight: 1.5,
+              scale: 12,
+            }}
+            onClick={() => onMarkerClick(marker)}
+          />
+        ))}
+
         {selectedMarker && (
           <InfoWindow
             position={selectedMarker.position}
             onCloseClick={onInfoWindowClose}
           >
-            <div className="max-w-xs p-1">
-              <h3 className="font-semibold text-zinc-900">{selectedMarker.title}</h3>
+            <div className="max-w-xs p-1" style={{ background: "#0b0d12", borderRadius: 4 }}>
+              <p style={{ color: "#22d3ee", fontSize: 11, fontWeight: 600, fontFamily: "monospace" }}>
+                {selectedMarker.title}
+              </p>
               {selectedMarker.description && (
-                <p className="mt-1 whitespace-pre-line text-sm text-zinc-600">
+                <p style={{ color: "#6b7280", fontSize: 10, marginTop: 4, whiteSpace: "pre-line", fontFamily: "monospace" }}>
                   {selectedMarker.description}
                 </p>
               )}
@@ -183,65 +233,60 @@ export function MapWidget({
         />
       )}
 
-      {/* Layer controls — top-left */}
-      <div className="absolute left-3 top-3 z-10 flex flex-col gap-1.5">
+      {/* Layer controls — terminal style */}
+      <div className="absolute left-3 top-3 z-10 flex flex-col gap-1.5 font-mono">
         <button
           onClick={() => setShowEventLayer((v) => !v)}
-          className={`rounded-md px-3 py-1.5 text-xs font-semibold shadow-md transition-colors ${
+          className={`rounded border px-2.5 py-1 text-[10px] tracking-widest shadow transition-colors ${
             showEventLayer
-              ? "bg-violet-600 text-white hover:bg-violet-700"
-              : "bg-white text-zinc-800 hover:bg-zinc-100"
+              ? "border-cyan-500/60 bg-cyan-500/10 text-cyan-400"
+              : "border-zinc-700 bg-[#0b0d12]/80 text-zinc-600 hover:border-zinc-500 hover:text-zinc-400"
           }`}
         >
-          {showEventLayer ? "Hide Events" : "Show Events"}
+          {showEventLayer ? "◉ EVENTS ON" : "◎ EVENTS OFF"}
         </button>
 
         <button
           onClick={handleToggleNJ}
-          className={`rounded-md px-3 py-1.5 text-xs font-semibold shadow-md transition-colors ${
+          className={`rounded border px-2.5 py-1 text-[10px] tracking-widest shadow transition-colors ${
             showNJLayer
-              ? "bg-red-600 text-white hover:bg-red-700"
-              : "bg-white text-zinc-800 hover:bg-zinc-100"
+              ? "border-orange-500/60 bg-orange-500/10 text-orange-400"
+              : "border-zinc-700 bg-[#0b0d12]/80 text-zinc-600 hover:border-zinc-500 hover:text-zinc-400"
           }`}
         >
-          {showNJLayer ? "Hide NJ Density" : "NJ Population Density"}
+          {showNJLayer ? "◉ DENSITY ON" : "◎ DENSITY OFF"}
         </button>
       </div>
 
-      {/* Legend — visible only when NJ density layer is on */}
+      {/* Legend — dark terminal style */}
       {showNJLayer && (
-        <div className="absolute bottom-8 left-3 z-10 rounded-md bg-white/90 p-3 shadow-md backdrop-blur-sm">
-          <p className="mb-1.5 text-xs font-bold text-zinc-700">
-            NJ Population Density
-          </p>
-          <p className="mb-2 text-[10px] text-zinc-500">people / sq mi (2020)</p>
+        <div className="absolute bottom-4 left-3 z-10 rounded border border-cyan-500/20 bg-[#0b0d12]/90 p-3 font-mono backdrop-blur-sm">
+          <p className="mb-1 text-[10px] tracking-[0.15em] text-cyan-400">// NJ DENSITY</p>
+          <p className="mb-2 text-[9px] text-zinc-600">people / sq mi · 2020 census</p>
 
           {/* Color ramp */}
-          <div className="mb-2 flex h-3 w-36 overflow-hidden rounded-sm">
+          <div className="mb-1 flex h-2 w-32 overflow-hidden rounded-sm">
             <div className="flex-1" style={{ background: "rgba(255,255,0,0.5)" }} />
             <div className="flex-1" style={{ background: "rgba(255,200,0,0.7)" }} />
             <div className="flex-1" style={{ background: "rgba(255,140,0,0.85)" }} />
             <div className="flex-1" style={{ background: "rgba(255,60,0,0.9)" }} />
             <div className="flex-1" style={{ background: "rgba(180,0,0,1)" }} />
           </div>
-          <div className="flex justify-between text-[10px] text-zinc-500">
-            <span>Low</span>
-            <span>High</span>
+          <div className="mb-2 flex justify-between text-[9px] text-zinc-600">
+            <span>LOW</span><span>HIGH</span>
           </div>
 
           {/* Top 5 counties */}
-          <div className="mt-2 space-y-0.5">
+          <div className="space-y-0.5">
             {NJ_COUNTY_LIST.sort((a, b) => b.density - a.density)
               .slice(0, 5)
               .map((c) => (
-                <div key={c.name} className="flex justify-between gap-4 text-[10px]">
-                  <span className="text-zinc-600">{c.name}</span>
-                  <span className="font-mono text-zinc-800">
-                    {c.density.toLocaleString()}
-                  </span>
+                <div key={c.name} className="flex justify-between gap-4 text-[9px]">
+                  <span className="text-zinc-500">{c.name}</span>
+                  <span className="text-cyan-700">{c.density.toLocaleString()}</span>
                 </div>
               ))}
-            <div className="mt-0.5 text-[10px] text-zinc-400">+ 16 more counties</div>
+            <div className="mt-1 text-[9px] text-zinc-700">+ 16 more counties</div>
           </div>
         </div>
       )}

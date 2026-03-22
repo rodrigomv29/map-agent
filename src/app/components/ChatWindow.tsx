@@ -91,7 +91,7 @@ export function ChatWindow({ onMarkers, onMapView }: ChatWindowProps) {
     if (part.type === "text") {
       if (!part.text) return null;
       return (
-        <p key={index} className="whitespace-pre-wrap text-sm">
+        <p key={index} className="whitespace-pre-wrap text-[11px] leading-relaxed text-zinc-300">
           {part.text}
         </p>
       );
@@ -101,8 +101,9 @@ export function ChatWindow({ onMarkers, onMapView }: ChatWindowProps) {
       if (part.state === "output-available") {
         const loc = part.output as ShowLocationOutput;
         return (
-          <div key={index} className="my-2 text-xs text-zinc-400">
-            Navigated to {loc.name}
+          <div key={index} className="mt-1.5 flex items-center gap-1.5 text-[10px] text-cyan-600">
+            <span>▶</span>
+            <span className="font-mono">flyTo({loc.name}, zoom={loc.zoom})</span>
           </div>
         );
       }
@@ -113,8 +114,9 @@ export function ChatWindow({ onMarkers, onMapView }: ChatWindowProps) {
       if (part.state === "output-available") {
         const markers = part.output as PlaceMarkerOutput[];
         return (
-          <div key={index} className="my-2 text-xs text-zinc-400">
-            Placed {markers.length} marker{markers.length > 1 ? "s" : ""} on the map
+          <div key={index} className="mt-1.5 flex items-center gap-1.5 text-[10px] text-cyan-600">
+            <span>▶</span>
+            <span className="font-mono">pin({markers.length} location{markers.length > 1 ? "s" : ""})</span>
           </div>
         );
       }
@@ -124,8 +126,9 @@ export function ChatWindow({ onMarkers, onMapView }: ChatWindowProps) {
     if (part.type === "tool-clearMarkers") {
       if (part.state === "output-available") {
         return (
-          <div key={index} className="my-2 text-xs text-zinc-400">
-            Cleared all markers
+          <div key={index} className="mt-1.5 flex items-center gap-1.5 text-[10px] text-red-500">
+            <span>✕</span>
+            <span className="font-mono">clearMarkers()</span>
           </div>
         );
       }
@@ -136,59 +139,55 @@ export function ChatWindow({ onMarkers, onMapView }: ChatWindowProps) {
   };
 
   return (
-    <div className="flex h-full flex-col bg-white dark:bg-zinc-900">
-      <div className="border-b border-zinc-200 p-4 dark:border-zinc-700">
-        <div className="flex items-start justify-between gap-2">
-          <div>
-            <h1 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
-              Map Chat
-            </h1>
-            <p className="text-sm text-zinc-500 dark:text-zinc-400">
-              Ask to navigate, place markers, or clear the map
-            </p>
-          </div>
+    <div className="flex h-full flex-col bg-[#0b0d12]">
+
+      {/* Panel header */}
+      <div className="border-b border-cyan-500/20 px-4 py-2.5">
+        <div className="flex items-center justify-between">
+          <span className="text-[11px] tracking-[0.2em] text-cyan-400">// COMMAND</span>
 
           {/* Sign in with Meta */}
           <button
             type="button"
-            className="flex shrink-0 items-center gap-2 rounded-lg bg-[#1877F2] px-3 py-2 text-xs font-semibold text-white shadow-sm transition-opacity hover:opacity-90 active:opacity-80"
+            className="flex items-center gap-1.5 rounded border border-[#1877F2]/40 bg-[#1877F2]/10 px-2 py-1 text-[10px] text-[#4a9eff] transition-colors hover:bg-[#1877F2]/20"
           >
-            {/* Meta logo mark */}
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              className="h-4 w-4 fill-white"
-              aria-hidden="true"
-            >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="h-3 w-3 fill-[#4a9eff]" aria-hidden="true">
               <path d="M12 2C6.477 2 2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.879V14.89h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.989C18.343 21.129 22 16.99 22 12c0-5.523-4.477-10-10-10z"/>
             </svg>
             Sign in with Meta
           </button>
         </div>
+
+        <p className="mt-1 text-[10px] text-zinc-700">
+          Model: <span className="text-zinc-500">claude-sonnet-4-6</span>
+          {"  ·  "}Tools: <span className="text-zinc-500">3 active</span>
+        </p>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4">
+      {/* Messages */}
+      <div className="flex-1 overflow-y-auto p-3">
         {messages.length === 0 && (
           <div className="flex h-full items-center justify-center">
-            <p className="text-center text-zinc-400 dark:text-zinc-500">
-              Try: "Show me Tokyo" or "Place a marker in Paris"
+            <p className="text-center text-[11px] tracking-wider text-zinc-700">
+              {">"} awaiting command...
             </p>
           </div>
         )}
 
-        <div className="space-y-4">
+        <div className="space-y-3">
           {messages.map((message) => (
             <div
               key={message.id}
-              className={`flex ${
-                message.role === "user" ? "justify-end" : "justify-start"
-              }`}
+              className={`flex flex-col ${message.role === "user" ? "items-end" : "items-start"}`}
             >
+              <span className="mb-1 text-[9px] tracking-[0.2em] text-zinc-700">
+                {message.role === "user" ? "OPERATOR" : "// NEXUS AI"}
+              </span>
               <div
-                className={`max-w-[80%] rounded-lg px-4 py-2 ${
+                className={`max-w-[88%] rounded px-3 py-2 ${
                   message.role === "user"
-                    ? "bg-blue-600 text-white"
-                    : "bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-100"
+                    ? "border border-cyan-500/30 bg-cyan-500/10 text-cyan-100"
+                    : "border border-zinc-700/50 bg-zinc-900/80 text-zinc-300"
                 }`}
               >
                 {message.parts.map((part, index) => renderPart(part, index))}
@@ -197,40 +196,51 @@ export function ChatWindow({ onMarkers, onMapView }: ChatWindowProps) {
           ))}
 
           {isLoading && (
-            <div className="flex justify-start">
-              <div className="rounded-lg bg-zinc-100 px-4 py-2 dark:bg-zinc-800">
-                <div className="flex space-x-1">
-                  <div className="h-2 w-2 animate-bounce rounded-full bg-zinc-400" />
-                  <div className="h-2 w-2 animate-bounce rounded-full bg-zinc-400 [animation-delay:0.1s]" />
-                  <div className="h-2 w-2 animate-bounce rounded-full bg-zinc-400 [animation-delay:0.2s]" />
-                </div>
+            <div className="flex flex-col items-start">
+              <span className="mb-1 text-[9px] tracking-[0.2em] text-zinc-700">// NEXUS AI</span>
+              <div className="flex gap-1.5 rounded border border-zinc-700/50 bg-zinc-900/80 px-3 py-2">
+                <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-cyan-500" style={{ animationDelay: "0ms" }} />
+                <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-cyan-500" style={{ animationDelay: "100ms" }} />
+                <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-cyan-500" style={{ animationDelay: "200ms" }} />
               </div>
             </div>
           )}
         </div>
       </div>
 
-      <form
-        onSubmit={handleSubmit}
-        className="border-t border-zinc-200 p-4 dark:border-zinc-700"
-      >
-        <div className="flex gap-2">
+      {/* Quick action buttons */}
+      <div className="flex flex-wrap gap-1.5 border-t border-cyan-500/20 px-3 py-2">
+        {["◆ PIN", "◉ HEAT", "≡ FILTER", "✕ CLEAR", "↩ UNDO"].map((label) => (
+          <button
+            key={label}
+            className="rounded border border-zinc-700 px-2 py-1 text-[10px] tracking-wider text-zinc-600 transition-colors hover:border-zinc-500 hover:text-zinc-300"
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {/* Input */}
+      <form onSubmit={handleSubmit} className="border-t border-cyan-500/20 px-3 py-2">
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-cyan-500">{">"}</span>
           <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Show me Tokyo, place a marker in Paris..."
-            className="flex-1 rounded-lg border border-zinc-300 bg-white px-4 py-2 text-sm text-zinc-900 placeholder-zinc-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder-zinc-500"
+            placeholder="Enter command or question..."
+            className="flex-1 bg-transparent text-xs text-zinc-300 placeholder-zinc-700 focus:outline-none"
           />
           <button
             type="submit"
             disabled={isLoading || !input.trim()}
-            className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded border border-cyan-500/40 bg-cyan-500/10 px-2 py-1 text-[10px] text-cyan-400 transition-colors hover:bg-cyan-500/20 disabled:opacity-30"
           >
-            Send
+            ▶
           </button>
         </div>
       </form>
+
     </div>
   );
 }
