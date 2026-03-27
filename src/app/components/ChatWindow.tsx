@@ -2,8 +2,32 @@
 
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { NewsMarker } from "./MapWidget";
+
+const COMMAND_SUGGESTIONS = [
+  "Show me Tokyo",
+  "Show me New York City",
+  "Show me London",
+  "Show me Paris",
+  "Show me Los Angeles",
+  "Show me Chicago",
+  "Show me Miami",
+  "Show me Newark, NJ",
+  "Zoom into Newark, NJ",
+  "Navigate to the Eiffel Tower",
+  "Navigate to Times Square",
+  "Take me to the Strait of Hormuz",
+  "Place a marker in Paris",
+  "Place a marker in Tokyo",
+  "Place a marker in London",
+  "Pin Cape Canaveral",
+  "Drop markers in London, Berlin, and Rome",
+  "Place a marker at Wembley Stadium",
+  "Clear the map",
+  "Remove all markers",
+  "Reset",
+];
 
 interface PlaceMarkerOutput {
   title: string;
@@ -30,6 +54,15 @@ export function ChatWindow({ onMarkers, onMapView }: ChatWindowProps) {
     transport: new DefaultChatTransport({ api: chatApi }),
   });
   const [input, setInput] = useState("");
+  const [suggestionIndex, setSuggestionIndex] = useState(-1);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const filteredSuggestions = input.trim()
+    ? COMMAND_SUGGESTIONS.filter((s) =>
+        s.toLowerCase().includes(input.toLowerCase())
+      )
+    : [];
 
   const isLoading = status === "streaming" || status === "submitted";
 
@@ -82,6 +115,40 @@ export function ChatWindow({ onMarkers, onMapView }: ChatWindowProps) {
     if (!input.trim() || isLoading) return;
     sendMessage({ text: input });
     setInput("");
+    setShowSuggestions(false);
+    setSuggestionIndex(-1);
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInput(e.target.value);
+    setShowSuggestions(true);
+    setSuggestionIndex(-1);
+  };
+
+  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!showSuggestions || filteredSuggestions.length === 0) return;
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setSuggestionIndex((i) => Math.min(i + 1, filteredSuggestions.length - 1));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setSuggestionIndex((i) => Math.max(i - 1, -1));
+    } else if (e.key === "Enter" && suggestionIndex >= 0) {
+      e.preventDefault();
+      setInput(filteredSuggestions[suggestionIndex]);
+      setShowSuggestions(false);
+      setSuggestionIndex(-1);
+    } else if (e.key === "Escape") {
+      setShowSuggestions(false);
+      setSuggestionIndex(-1);
+    }
+  };
+
+  const handleSuggestionClick = (suggestion: string) => {
+    setInput(suggestion);
+    setShowSuggestions(false);
+    setSuggestionIndex(-1);
+    inputRef.current?.focus();
   };
 
   const renderPart = (
@@ -221,25 +288,52 @@ export function ChatWindow({ onMarkers, onMapView }: ChatWindowProps) {
       </div>
 
       {/* Input */}
-      <form onSubmit={handleSubmit} className="border-t border-cyan-500/20 px-3 py-2">
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-cyan-500">{">"}</span>
-          <input
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Enter command or question..."
-            className="flex-1 bg-transparent text-xs text-zinc-300 placeholder-zinc-700 focus:outline-none"
-          />
-          <button
-            type="submit"
-            disabled={isLoading || !input.trim()}
-            className="rounded border border-cyan-500/40 bg-cyan-500/10 px-2 py-1 text-[10px] text-cyan-400 transition-colors hover:bg-cyan-500/20 disabled:opacity-30"
-          >
-            ▶
-          </button>
-        </div>
-      </form>
+      <div className="relative border-t border-cyan-500/20">
+        {/* Suggestions dropdown */}
+        {showSuggestions && filteredSuggestions.length > 0 && (
+          <div className="absolute bottom-full left-0 right-0 z-50 max-h-48 overflow-y-auto border border-cyan-500/20 bg-[#0b0d12] shadow-lg">
+            {filteredSuggestions.map((suggestion, i) => (
+              <button
+                key={suggestion}
+                type="button"
+                onMouseDown={(e) => { e.preventDefault(); handleSuggestionClick(suggestion); }}
+                className={`flex w-full items-center gap-2 px-3 py-1.5 text-left text-[11px] font-mono transition-colors ${
+                  i === suggestionIndex
+                    ? "bg-cyan-500/15 text-cyan-300"
+                    : "text-zinc-500 hover:bg-zinc-800/60 hover:text-zinc-300"
+                }`}
+              >
+                <span className="text-cyan-700">›</span>
+                {suggestion}
+              </button>
+            ))}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="px-3 py-2">
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-cyan-500">{">"}</span>
+            <input
+              ref={inputRef}
+              type="text"
+              value={input}
+              onChange={handleInputChange}
+              onKeyDown={handleInputKeyDown}
+              onFocus={() => setShowSuggestions(true)}
+              onBlur={() => setTimeout(() => setShowSuggestions(false), 100)}
+              placeholder="Enter command or question..."
+              className="flex-1 bg-transparent text-xs text-zinc-300 placeholder-zinc-700 focus:outline-none"
+            />
+            <button
+              type="submit"
+              disabled={isLoading || !input.trim()}
+              className="rounded border border-cyan-500/40 bg-cyan-500/10 px-2 py-1 text-[10px] text-cyan-400 transition-colors hover:bg-cyan-500/20 disabled:opacity-30"
+            >
+              ▶
+            </button>
+          </div>
+        </form>
+      </div>
 
     </div>
   );

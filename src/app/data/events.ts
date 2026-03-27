@@ -171,6 +171,7 @@ export function eventToMarker(event: Event): StoryMarker | NewsMarker {
     position: { lat: event.lat, lng: event.lng },
     title: event.title,
     description: `${event.date} · ${event.time}\n${event.venue}, ${event.city}, ${event.state}`,
+    markerType: "entertainment",
   };
 
   if (event.stories && event.stories.length > 0) {

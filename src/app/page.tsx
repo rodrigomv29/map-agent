@@ -4,6 +4,7 @@ import { useState, useCallback, useEffect } from "react";
 import { ChatWindow } from "./components/ChatWindow";
 import { MapWidget, NewsMarker } from "./components/MapWidget";
 import { EventFeed } from "./components/EventFeed";
+import { NewsTicker } from "./components/NewsTicker";
 import { NJ_EVENTS, eventToMarker } from "./data/events";
 import { HEADLINES, headlineToMarker } from "./data/headlines";
 
@@ -16,6 +17,13 @@ export default function Home() {
   const [zoom, setZoom] = useState(8);
   const [utcTime, setUtcTime] = useState("");
   const [activeTab, setActiveTab] = useState<"feed" | "layers" | "cmd" | "sat">("cmd");
+  const [tickerVisible, setTickerVisible] = useState(false);
+  const [tickerLabel, setTickerLabel] = useState("BREAKING");
+
+  const handleMarkerSelect = useCallback((marker: NewsMarker) => {
+    setTickerLabel(marker.title ?? "BREAKING");
+    setTickerVisible(true);
+  }, []);
 
   useEffect(() => {
     const tick = () => setUtcTime(new Date().toISOString().slice(11, 19));
@@ -90,6 +98,7 @@ export default function Home() {
             headlineMarkers={HEADLINE_MARKERS}
             center={center}
             zoom={zoom}
+            onMarkerSelect={handleMarkerSelect}
           />
         </div>
 
@@ -99,6 +108,13 @@ export default function Home() {
         </div>
 
       </div>
+
+      {/* ── News ticker ─────────────────────────────────────────── */}
+      <NewsTicker
+        visible={tickerVisible}
+        label={tickerLabel}
+        onClose={() => setTickerVisible(false)}
+      />
 
       {/* ── Status bar ──────────────────────────────────────────── */}
       <footer className="flex h-7 shrink-0 items-center gap-6 border-t border-cyan-500/20 px-4 text-[10px] tracking-wider text-zinc-700">
