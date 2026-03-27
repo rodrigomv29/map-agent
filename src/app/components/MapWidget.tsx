@@ -6,6 +6,8 @@ import { NJPopulationLayer, NJ_COUNTY_LIST } from "./NJPopulationLayer";
 import { StoryViewer } from "./StoryViewer";
 import { isStoryMarker, type StoryMarker } from "../types/story";
 
+export type MarkerType = "entertainment" | "conflict" | "politics" | "sports" | "tech" | "breaking" | "chat";
+
 export interface NewsMarker {
   id: string;
   position: { lat: number; lng: number };
@@ -13,6 +15,8 @@ export interface NewsMarker {
   description?: string;
   /** Hex color string — drives the hexagon stroke/fill for headline markers */
   accentColor?: string;
+  /** Category tag used for legend labels and icon selection */
+  markerType?: MarkerType;
 }
 
 interface MapWidgetProps {
@@ -21,6 +25,7 @@ interface MapWidgetProps {
   headlineMarkers?: NewsMarker[];
   center?: { lat: number; lng: number };
   zoom?: number;
+  onMarkerSelect?: (marker: NewsMarker) => void;
 }
 
 const containerStyle = {
@@ -39,15 +44,18 @@ const NJ_ZOOM = 8;
 // Must be stable (outside component) to avoid Google Maps warning
 const LIBRARIES: ("visualization")[] = ["visualization"];
 
-// Flat-top hexagon — matches the screenshot's marker style
-const EVENT_MARKER_ICON = {
-  path: "M 1,0 L 0.5,0.866 L -0.5,0.866 L -1,0 L -0.5,-0.866 L 0.5,-0.866 Z",
-  fillColor: "#22d3ee",
-  fillOpacity: 0.15,
-  strokeColor: "#22d3ee",
+// 5-pointed star — live entertainment events
+const ENTERTAINMENT_MARKER_ICON = {
+  path: "M 0,-1 L 0.224,-0.309 L 0.951,-0.309 L 0.363,0.118 L 0.588,0.809 L 0,0.382 L -0.588,0.809 L -0.363,0.118 L -0.951,-0.309 L -0.224,-0.309 Z",
+  fillColor: "#facc15",
+  fillOpacity: 0.85,
+  strokeColor: "#fde68a",
   strokeWeight: 1.5,
-  scale: 12,
+  scale: 14,
 };
+
+// Flat-top hexagon — news/headline markers (conflict, politics, sports…)
+const HEADLINE_HEXAGON_PATH = "M 1,0 L 0.5,0.866 L -0.5,0.866 L -1,0 L -0.5,-0.866 L 0.5,-0.866 Z";
 
 // Cyan diamond for chat-placed markers
 const CHAT_MARKER_ICON = {
@@ -87,6 +95,7 @@ export function MapWidget({
   headlineMarkers = [],
   center = defaultCenter,
   zoom = 4,
+  onMarkerSelect,
 }: MapWidgetProps) {
   const [selectedMarker, setSelectedMarker] = useState<NewsMarker | null>(null);
   const [selectedStoryMarker, setSelectedStoryMarker] = useState<StoryMarker | null>(null);
@@ -106,7 +115,8 @@ export function MapWidget({
     } else {
       setSelectedMarker(marker);
     }
-  }, []);
+    onMarkerSelect?.(marker);
+  }, [onMarkerSelect]);
 
   const onInfoWindowClose = useCallback(() => {
     setSelectedMarker(null);
@@ -175,28 +185,28 @@ export function MapWidget({
           />
         ))}
 
-        {/* Event markers — cyan hexagon, togglable */}
+        {/* Entertainment markers — yellow star, togglable */}
         {showEventLayer &&
           eventMarkers.map((marker) => (
             <Marker
               key={marker.id}
               position={marker.position}
               title={marker.title}
-              icon={EVENT_MARKER_ICON}
+              icon={ENTERTAINMENT_MARKER_ICON}
               onClick={() => onMarkerClick(marker)}
             />
           ))}
 
-        {/* Headline markers — colored hexagon per category accent */}
+        {/* Headline markers — hexagon colored by category */}
         {headlineMarkers.map((marker) => (
           <Marker
             key={marker.id}
             position={marker.position}
             title={marker.title}
             icon={{
-              path: "M 1,0 L 0.5,0.866 L -0.5,0.866 L -1,0 L -0.5,-0.866 L 0.5,-0.866 Z",
+              path: HEADLINE_HEXAGON_PATH,
               fillColor: marker.accentColor ?? "#ef4444",
-              fillOpacity: 0.2,
+              fillOpacity: 0.35,
               strokeColor: marker.accentColor ?? "#ef4444",
               strokeWeight: 1.5,
               scale: 12,
@@ -239,11 +249,11 @@ export function MapWidget({
           onClick={() => setShowEventLayer((v) => !v)}
           className={`rounded border px-2.5 py-1 text-[10px] tracking-widest shadow transition-colors ${
             showEventLayer
-              ? "border-cyan-500/60 bg-cyan-500/10 text-cyan-400"
+              ? "border-yellow-400/60 bg-yellow-400/10 text-yellow-300"
               : "border-zinc-700 bg-[#0b0d12]/80 text-zinc-600 hover:border-zinc-500 hover:text-zinc-400"
           }`}
         >
-          {showEventLayer ? "◉ EVENTS ON" : "◎ EVENTS OFF"}
+          {showEventLayer ? "★ ENTERTAINMENT ON" : "☆ ENTERTAINMENT OFF"}
         </button>
 
         <button
@@ -256,6 +266,82 @@ export function MapWidget({
         >
           {showNJLayer ? "◉ DENSITY ON" : "◎ DENSITY OFF"}
         </button>
+      </div>
+
+      {/* Map legend — always visible, bottom-right */}
+      <div className="absolute bottom-4 right-3 z-10 rounded border border-cyan-500/20 bg-[#0b0d12]/92 p-3 font-mono backdrop-blur-sm">
+        <p className="mb-2 text-[10px] tracking-[0.15em] text-cyan-400">// LEGEND</p>
+        <div className="space-y-1.5">
+          {/* Entertainment */}
+          <div className="flex items-center gap-2">
+            <svg width="14" height="14" viewBox="-1.2 -1.2 2.4 2.4">
+              <polygon
+                points="0,-1 0.224,-0.309 0.951,-0.309 0.363,0.118 0.588,0.809 0,0.382 -0.588,0.809 -0.363,0.118 -0.951,-0.309 -0.224,-0.309"
+                fill="#facc15" fillOpacity="0.85" stroke="#fde68a" strokeWidth="0.12"
+              />
+            </svg>
+            <div>
+              <p className="text-[10px] text-yellow-300">LIVE ENTERTAINMENT</p>
+              <p className="text-[9px] text-zinc-600">Concerts · Theater · Dance</p>
+            </div>
+          </div>
+
+          {/* Conflict */}
+          <div className="flex items-center gap-2">
+            <svg width="14" height="14" viewBox="-1.2 -1.2 2.4 2.4">
+              <polygon
+                points="1,0 0.5,0.866 -0.5,0.866 -1,0 -0.5,-0.866 0.5,-0.866"
+                fill="#ef4444" fillOpacity="0.35" stroke="#ef4444" strokeWidth="0.12"
+              />
+            </svg>
+            <div>
+              <p className="text-[10px] text-red-400">ACTIVE CONFLICT</p>
+              <p className="text-[9px] text-zinc-600">Battle zones · War updates</p>
+            </div>
+          </div>
+
+          {/* Political */}
+          <div className="flex items-center gap-2">
+            <svg width="14" height="14" viewBox="-1.2 -1.2 2.4 2.4">
+              <polygon
+                points="1,0 0.5,0.866 -0.5,0.866 -1,0 -0.5,-0.866 0.5,-0.866"
+                fill="#a78bfa" fillOpacity="0.35" stroke="#a78bfa" strokeWidth="0.12"
+              />
+            </svg>
+            <div>
+              <p className="text-[10px] text-violet-400">POLITICAL TURMOIL</p>
+              <p className="text-[9px] text-zinc-600">Legal battles · Civil unrest</p>
+            </div>
+          </div>
+
+          {/* Sports */}
+          <div className="flex items-center gap-2">
+            <svg width="14" height="14" viewBox="-1.2 -1.2 2.4 2.4">
+              <polygon
+                points="1,0 0.5,0.866 -0.5,0.866 -1,0 -0.5,-0.866 0.5,-0.866"
+                fill="#22c55e" fillOpacity="0.35" stroke="#22c55e" strokeWidth="0.12"
+              />
+            </svg>
+            <div>
+              <p className="text-[10px] text-green-400">SPORTS</p>
+              <p className="text-[9px] text-zinc-600">Matches · Championships</p>
+            </div>
+          </div>
+
+          {/* Chat pin */}
+          <div className="flex items-center gap-2">
+            <svg width="14" height="14" viewBox="-1.2 -1.2 2.4 2.4">
+              <polygon
+                points="0,-1.2 0.85,0 0,1.2 -0.85,0"
+                fill="#60a5fa" fillOpacity="0.2" stroke="#60a5fa" strokeWidth="0.15"
+              />
+            </svg>
+            <div>
+              <p className="text-[10px] text-blue-400">COMMAND PIN</p>
+              <p className="text-[9px] text-zinc-600">Placed via chat</p>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Legend — dark terminal style */}
