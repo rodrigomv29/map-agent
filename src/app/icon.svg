@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <!-- Dark background with subtle cyan border -->
+  <rect width="32" height="32" rx="6" fill="#0b0d12"/>
+  <rect width="32" height="32" rx="6" fill="none" stroke="#22d3ee" stroke-width="1" opacity="0.4"/>
+
+  <!-- NX monogram in white, monospace style -->
+  <text
+    x="16"
+    y="22"
+    text-anchor="middle"
+    font-family="'Courier New', Courier, monospace"
+    font-size="14"
+    font-weight="700"
+    letter-spacing="0"
+    fill="#ffffff"
+  >NX</text>
+</svg>
