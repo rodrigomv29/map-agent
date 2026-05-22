@@ -1,7 +1,6 @@
 "use client";
 
-import { HeatmapLayer } from "@react-google-maps/api";
-import { useMemo } from "react";
+import { Circle } from "@react-google-maps/api";
 
 // NJ county seats / geographic centers with population density (people/sq mi, 2020 Census)
 const NJ_COUNTIES = [
@@ -28,16 +27,33 @@ const NJ_COUNTIES = [
   { name: "Salem",      lat: 39.5748, lng: -75.3488, density: 130   },
 ];
 
-// Gradient: transparent → yellow → orange → red (high density)
-const HEATMAP_GRADIENT = [
-  "rgba(0,0,0,0)",
-  "rgba(255,255,0,0.4)",
-  "rgba(255,200,0,0.6)",
-  "rgba(255,140,0,0.75)",
-  "rgba(255,60,0,0.85)",
-  "rgba(220,0,0,0.95)",
-  "rgba(180,0,0,1)",
-];
+const MAX_DENSITY = Math.max(...NJ_COUNTIES.map((c) => c.density));
+
+// Log-scale ratio so Hudson's extreme outlier doesn't flatten all other counties
+function densityRatio(density: number): number {
+  return Math.log(density) / Math.log(MAX_DENSITY);
+}
+
+// Interpolate yellow → orange → red based on log-scaled ratio
+function densityToColor(density: number): string {
+  const t = densityRatio(density);
+  let r: number, g: number;
+  if (t < 0.5) {
+    const s = t * 2;
+    r = 255;
+    g = Math.round(255 - s * 115); // 255 → 140
+  } else {
+    const s = (t - 0.5) * 2;
+    r = 255;
+    g = Math.round(140 - s * 140); // 140 → 0
+  }
+  return `#${r.toString(16).padStart(2, "0")}${g.toString(16).padStart(2, "0")}00`;
+}
+
+// 3 km (sparse) → 20 km (dense) radius in meters
+function densityToRadius(density: number): number {
+  return 3000 + densityRatio(density) * 17000;
+}
 
 export interface NJCounty {
   name: string;
@@ -54,25 +70,28 @@ interface NJPopulationLayerProps {
 }
 
 export function NJPopulationLayer({ visible }: NJPopulationLayerProps) {
-  // sqrt-scale so mid-density counties are still visible (Hudson won't completely dominate)
-  const data = useMemo(() => {
-    return NJ_COUNTIES.map(({ lat, lng, density }) => ({
-      location: new google.maps.LatLng(lat, lng),
-      weight: Math.sqrt(density),
-    }));
-  }, []);
+  if (!visible) return null;
 
   return (
-    <HeatmapLayer
-      data={data}
-      options={{
-        radius: 50,
-        // Toggle via opacity instead of unmounting — avoids the HeatmapLayer
-        // cleanup bug in @react-google-maps/api where .setMap(null) is not
-        // called on unmount, leaving the heatmap visually stuck on the map.
-        opacity: visible ? 0.85 : 0,
-        gradient: HEATMAP_GRADIENT,
-      }}
-    />
+    <>
+      {NJ_COUNTIES.map((county) => {
+        const color = densityToColor(county.density);
+        const opacity = 0.3 + densityRatio(county.density) * 0.55;
+        return (
+          <Circle
+            key={county.name}
+            center={{ lat: county.lat, lng: county.lng }}
+            radius={densityToRadius(county.density)}
+            options={{
+              fillColor: color,
+              fillOpacity: opacity,
+              strokeColor: color,
+              strokeOpacity: 0.4,
+              strokeWeight: 1,
+            }}
+          />
+        );
+      })}
+    </>
   );
 }

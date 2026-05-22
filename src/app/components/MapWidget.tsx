@@ -42,7 +42,7 @@ const NJ_CENTER = { lat: 40.0583, lng: -74.4057 };
 const NJ_ZOOM = 8;
 
 // Must be stable (outside component) to avoid Google Maps warning
-const LIBRARIES: ("visualization")[] = ["visualization"];
+const LIBRARIES: [] = [];
 
 // 5-pointed star — live entertainment events
 const ENTERTAINMENT_MARKER_ICON = {
