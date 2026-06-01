@@ -40,6 +40,9 @@ yarn-error.log*
 .vercel
 
 hardcoded.txt
+chat-window-breakdown.md
+code-review-results.md
+engineering-workflow.md
 # typescript
 *.tsbuildinfo
 next-env.d.ts
